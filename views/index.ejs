@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
+</head>
+<body>
+    <% include ./nav.ejs %>
+    <h1>Do you want to make timetable?</h1>
+    <form id="check_form" action="/timetable" method="get">
+        <div id="grade1"><h3>1학년</h3></div>
+        <div id="grade2"><h3>2학년</h3></div>
+        <div id="grade3"><h3>3학년</h3></div>
+        <div id="grade4"><h3>4학년</h3></div>
+        
+        <input id="reset_btn" type="button" class="btn btn-outline-danger" value="Reset">
+        <input id="make_timetable" type="button" class="btn btn-outline-success" value="확인">
+    </form>
+
+    <div id="table_area"></div>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js" integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js" integrity="sha384-h0AbiXch4ZDo7tp9hKZ4TsHbi047NrKGLO3SEJAg45jXxnGIfYzk4Si90RDIqNm1" crossorigin="anonymous"></script>
+
+    <style>
+    table tr td {
+        width: 120px;
+        text-align: center;
+    }
+
+    table tr td:nth-child(1) {
+        width: 20px;
+    }
+    </style>
+    <script>
+    $(function(){
+        var result = <%-result%>;
+        for(var i in result) {
+            var html = "";
+            html += '<div class="form-check form-check-inline">';
+            html += '   <label class="form-check-label">';
+            html += '       <input class="form-check-input" type="checkbox" name="subject" value="' + result[i]["subject"] + '">' + result[i]["subject"];
+            html += '   </label>';
+            html += '</div>';
+            console.log(result[i]["grade"])
+            $("#grade"+result[i]["grade"]).append(html);
+        }
+
+        $("#reset_btn").click(function(e) {
+            e.preventDefault();
+            $('#check_form input[name="subject"]:checked').each(function() {
+                $(this).prop('checked', false);
+                $(this).attr('checked', false);
+            });
+        });
+
+        $("#make_timetable").click(function(e){
+            e.preventDefault();
+
+            var subject = [];
+            $('#check_form input[name="subject"]:checked').each(function() {
+                subject.push($(this).val());
+            });
+            $.ajax({
+                url: '/timetable', 
+                data: { subject: subject }, 
+                type: 'GET', 
+                success: function(result){ 
+                    var html = "";
+
+                    if(parseInt(result["count"])<1) {
+                        html += "<h2>가능한 시간표가 없어요 ㅠㅠ</h2>";
+                        $("#table_area").html(html);
+                        return;
+                    }
+
+                    for(var cnt=0; cnt<parseInt(result["count"]); cnt++) {
+                        if(!(cnt % 2)) html += "<div class='row center'>";
+                        html += "<div class='col-sm-5'>";
+                        html += "<h2>Table" + (cnt+1) + "</h2>";
+                        html += "<table class='table table-bordered'>";
+                        for(var i=0; i<result["result"][cnt].length; i++) {
+                            html += "<tr>";
+                            html += "<td>" + (i+1) + "</td>";
+                            for(var j=0; j<result["result"][cnt][i].length; j++) {
+                                if(result["result"][cnt][i][j] == "0") html += "<td></td>";
+                                else html += "<td>" + result["result"][cnt][i][j] + "</td>";
+                            }
+                            html += "</tr>";
+                        }
+                        html += "</table></div>";
+                        if(cnt % 2) html += "</div>";
+                        html += "<br><br>";
+                    }
+                    $("#table_area").html(html);
+                }
+            });
+        });
+    });
+    </script>
+
+</body>
+</html>
