@@ -1,6 +1,6 @@
 // 서버 기본 설정
-const hostname = "10.34.9.182";
-const port = 7423;
+const hostname = "*.*.*.*";
+const port = ****;
 
 // FrameWork: Express
 const express = require("express");
@@ -16,9 +16,9 @@ const Timetable = require("./timetable");
 const mysql = require("mysql");
 const con = mysql.createConnection({
 	host: "localhost",
-	user: "root",
-	password: "intI2017!@",
-    database: "intI"
+	user: "****",
+	password: "****",
+    database: "****"
 });
 con.connect(function(err) {
 	if(err) throw err;
